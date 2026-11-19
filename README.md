@@ -2,7 +2,7 @@
 
 A small native Linux system summary. Warm white, copper, quiet spacing.
 
-The x86_64 release executable is **23,288 bytes**. It uses Rust `no_std`, fixed buffers and direct Linux system calls: no Cargo dependencies, allocator, libc, external commands, network requests or background service. Default output omits user names, host names, IP addresses and serial numbers.
+The official v0.1.0 x86_64 executable is **22,808 bytes** (about 22.3 KiB). It uses Rust `no_std`, fixed buffers and direct Linux system calls: no Cargo dependencies, allocator, libc, external commands, network requests or background service. Default output omits user names, host names, IP addresses and serial numbers.
 
 [Releases](https://github.com/LIghtJUNction/zfetch/releases) · [Measurements](docs/performance.md) · [Design](docs/design.md) · [oh-my-ztty](https://github.com/LIghtJUNction/oh-my-ztty)
 
@@ -17,6 +17,15 @@ zfetch --no-color
 The default view shows OS, kernel, architecture, CPU, online thread count, memory, uptime, configured shell and terminal identifier. Missing fields are `unavailable` in text and `null` in JSON. Redirecting output or setting `NO_COLOR` disables ANSI color. No patched font is required.
 
 ## Install
+
+On Arch Linux, install [zfetch-project-z-bin](https://aur.archlinux.org/packages/zfetch-project-z-bin) for the official binary, or [zfetch-project-z](https://aur.archlinux.org/packages/zfetch-project-z) to build from source:
+
+```sh
+yay -S zfetch-project-z-bin
+zfetch
+```
+
+Both packages install the command `zfetch`. AUR already has an unrelated older project named `zfetch`; the package names distinguish Project Z and declare a conflict so one installation cannot overwrite the other.
 
 Download the archive for Linux x86_64 or aarch64 and `SHA256SUMS` from [Releases](https://github.com/LIghtJUNction/zfetch/releases), verify the checksum, then extract it. Install the executable to a user-owned command directory:
 

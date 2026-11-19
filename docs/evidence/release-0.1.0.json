@@ -1,0 +1,36 @@
+{
+  "version": "0.1.0",
+  "source_sha": "f19b278676206d76626dd01e4b89f7ad9ce9318f",
+  "release_url": "https://github.com/LIghtJUNction/zfetch/releases/tag/v0.1.0",
+  "native_workflow_url": "https://github.com/LIghtJUNction/zfetch/actions/runs/44633088984",
+  "native_workflow_result": {
+    "x86_64": "success",
+    "aarch64": "success",
+    "publish": "success"
+  },
+  "official_artifacts": {
+    "x86_64": {
+      "archive_sha256": "9dbb856645309e89f2ce2cd191588f3206bbffd4e1806c18ccd381bc7346e606",
+      "binary_bytes": 22808,
+      "binary_sha256": "003f0dbb904f9a38770978acbce533a60f712c4e6c0dbbd870b3a3a0fd7c90de",
+      "downloaded_smoke": "native --json success"
+    },
+    "aarch64": {
+      "archive_sha256": "b2874564e9e40242b2be219b721e0ba69b0c906bd8be74ea1336227e9d2a0918",
+      "binary_bytes": 66168,
+      "binary_sha256": "b434b5a740bc579be5e6c59b0847fb0861057bb6d7fe76b877c326128c1c2df8",
+      "downloaded_smoke": "qemu-aarch64 --json success"
+    }
+  },
+  "source_archive_sha256": "4bc6bc960c1044d666eb4d5342529a62d92a8a5d97712cc5355226202b225de5",
+  "aur_validation": {
+    "source_package": "makepkg --nodeps --force: passed; Rust 1.100.0 from rustup verified directly because pacman does not register that toolchain version",
+    "binary_package": "makepkg --force: passed",
+    "unit_tests_in_source_package": 6,
+    "namcap_warnings": [
+      "static executable lacks FULL RELRO",
+      "static executable lacks PIE"
+    ],
+    "runtime_dependencies": []
+  }
+}

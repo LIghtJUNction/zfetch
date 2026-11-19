@@ -30,3 +30,10 @@ The production Cargo graph contains only zfetch. ELF checks reject a dynamic loa
 [Raw timings and memory samples](benchmarks/linux-x86_64-0.1.0.json) include commands and the measured binary's SHA-256. [Syscall evidence](evidence/syscalls-linux-x86_64.json) states the trace scope. These measurements do not establish a universal ranking across hardware or other fetch tools.
 
 Reproduce with `make benchmark`. Pass `--runs` and `--output` directly to `scripts/benchmark.py` to select sample count and destination.
+
+
+## Official release artifacts
+
+The official v0.1.0 binaries are 22,808 bytes on x86_64 and 66,168 bytes on aarch64. The x86_64 benchmark above used a locally linked 23,288-byte build of the same source; linker and platform differences affect ELF layout. The measurement record identifies that exact local binary and does not silently substitute the release file. Both official architecture jobs passed native tests, and both downloaded archives passed their published SHA-256 checks before AUR packaging.
+
+See [release evidence](evidence/release-0.1.0.json).
