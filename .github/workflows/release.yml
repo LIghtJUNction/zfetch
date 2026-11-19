@@ -1,0 +1,61 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            architecture: x86_64
+          - runner: ubuntu-24.04-arm
+            architecture: aarch64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install toolchain
+        run: rustup toolchain install 1.100.0 --profile minimal --component rustfmt --component clippy
+      - name: Verify tag
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, tomllib
+          assert os.environ["GITHUB_REF_NAME"] == "v" + tomllib.loads(Path("Cargo.toml").read_text())["package"]["version"]
+          PY
+      - name: Validate native release
+        run: make check
+      - name: Package
+        run: python3 scripts/package.py "${{ matrix.architecture }}"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: zfetch-${{ matrix.architecture }}
+          path: dist/*.tar.gz
+          if-no-files-found: error
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: zfetch-*
+          merge-multiple: true
+          path: dist
+      - name: Checksum and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          files = sorted(Path("dist").glob("*.tar.gz"))
+          assert len(files) == 2
+          Path("dist/SHA256SUMS").write_text("".join(hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name + "\n" for p in files))
+          PY
+          gh release create "$GITHUB_REF_NAME" dist/*.tar.gz dist/SHA256SUMS --verify-tag --title "$GITHUB_REF_NAME" --generate-notes

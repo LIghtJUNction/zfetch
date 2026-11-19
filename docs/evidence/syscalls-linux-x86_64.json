@@ -1,0 +1,8 @@
+{
+  "schema": "zfetch.syscall-check.v1",
+  "trace_scope": "strace -f -e trace=process,network",
+  "entry_execve_calls": 1,
+  "child_process_calls": 0,
+  "network_calls": 0,
+  "exit_code": 0
+}

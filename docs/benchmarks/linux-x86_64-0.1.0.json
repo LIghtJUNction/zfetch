@@ -1,0 +1,143 @@
+{
+  "schema": "zfetch.benchmark.v1",
+  "measured_at": "2026-11-19T22:47:29.047944+00:00",
+  "architecture": "x86_64",
+  "zfetch_version": "zfetch 0.1.0",
+  "fastfetch_version": "fastfetch 2.71.0 (x86_64)",
+  "binary_bytes": 23288,
+  "binary_sha256": "7ef58bc624eeca501a9c5d34e4cb17588b74cc59d0e9d0be6e3d49eafc1b47e8",
+  "fastfetch_binary_bytes": 2000920,
+  "wall_scope": "Python parent spawn, execution and wait; warm filesystem cache; round-robin interleaved order; other development jobs may be active",
+  "comparison_scope": "Core JSON compares OS, kernel, CPU, memory, uptime, configured/detected shell and terminal modules. Fields are not identical. Stock-default fastfetch also probes broader default modules. User fastfetch config is disabled.",
+  "memory_scope": "Three /proc smaps_rollup samples per command after /proc wchan confirms blocking on a prefilled stdout pipe; resident sample, not a whole-run peak.",
+  "commands": {
+    "zfetch_text": [
+      "zfetch",
+      "--no-color"
+    ],
+    "zfetch_json": [
+      "zfetch",
+      "--json"
+    ],
+    "fastfetch_core_json": [
+      "fastfetch",
+      "--config",
+      "none",
+      "--logo",
+      "none",
+      "--structure",
+      "OS:Kernel:CPU:Memory:Uptime:Shell:Terminal",
+      "--format",
+      "json"
+    ],
+    "fastfetch_stock_default": [
+      "fastfetch",
+      "--config",
+      "none"
+    ]
+  },
+  "wall": {
+    "zfetch_text": {
+      "runs": 100,
+      "median_ms": 0.42873150000000004,
+      "p95_ms": 1.061567,
+      "min_ms": 0.260144
+    },
+    "zfetch_json": {
+      "runs": 100,
+      "median_ms": 0.38494700000000004,
+      "p95_ms": 0.99698,
+      "min_ms": 0.270698
+    },
+    "fastfetch_core_json": {
+      "runs": 100,
+      "median_ms": 2.502544,
+      "p95_ms": 5.340347,
+      "min_ms": 1.484995
+    },
+    "fastfetch_stock_default": {
+      "runs": 100,
+      "median_ms": 15.183929,
+      "p95_ms": 26.603659,
+      "min_ms": 11.742596
+    }
+  },
+  "memory": {
+    "zfetch_text": {
+      "available": true,
+      "samples": [
+        {
+          "rss_kib": 60,
+          "pss_kib": 56
+        },
+        {
+          "rss_kib": 64,
+          "pss_kib": 60
+        },
+        {
+          "rss_kib": 64,
+          "pss_kib": 60
+        }
+      ],
+      "rss_kib_median": 64,
+      "pss_kib_median": 60
+    },
+    "zfetch_json": {
+      "available": true,
+      "samples": [
+        {
+          "rss_kib": 60,
+          "pss_kib": 56
+        },
+        {
+          "rss_kib": 60,
+          "pss_kib": 56
+        },
+        {
+          "rss_kib": 60,
+          "pss_kib": 56
+        }
+      ],
+      "rss_kib_median": 60,
+      "pss_kib_median": 56
+    },
+    "fastfetch_core_json": {
+      "available": true,
+      "samples": [
+        {
+          "rss_kib": 4996,
+          "pss_kib": 1915
+        },
+        {
+          "rss_kib": 4968,
+          "pss_kib": 1897
+        },
+        {
+          "rss_kib": 5048,
+          "pss_kib": 2007
+        }
+      ],
+      "rss_kib_median": 4996,
+      "pss_kib_median": 1915
+    },
+    "fastfetch_stock_default": {
+      "available": true,
+      "samples": [
+        {
+          "rss_kib": 12464,
+          "pss_kib": 7033
+        },
+        {
+          "rss_kib": 12568,
+          "pss_kib": 7044
+        },
+        {
+          "rss_kib": 12508,
+          "pss_kib": 7035
+        }
+      ],
+      "rss_kib_median": 12508,
+      "pss_kib_median": 7035
+    }
+  }
+}
