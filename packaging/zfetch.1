@@ -1,0 +1,42 @@
+.TH ZFETCH 1 "2026-11" "zfetch" "User Commands"
+.SH NAME
+zfetch \- a small native Linux system summary
+.SH SYNOPSIS
+.B zfetch
+[--json] [--no-color]
+.SH DESCRIPTION
+zfetch reads a bounded set of native system files and prints OS, kernel,
+architecture, CPU, online logical CPU count, memory use, uptime, configured
+shell and terminal identifier.
+No package enumeration, network requests, external commands or resident process
+are used. User names, host names, IP addresses and serial numbers are omitted.
+.SH OPTIONS
+.TP
+.B --json
+Emit zfetch.system.v1 JSON. Missing fields are null.
+.TP
+.B --no-color
+Disable ANSI color. Redirected output and NO_COLOR also disable color.
+.TP
+.B -h, --help
+Show help without probing the system.
+.TP
+.B -V, --version
+Show the version without probing the system.
+.SH SOURCES
+OS comes from os-release, kernel and architecture from uname, CPU from the first
+4096 bytes of /proc/cpuinfo, and the CPU count from /sys/devices/system/cpu/online.
+Memory use is MemTotal minus MemAvailable from /proc/meminfo. Uptime is read
+from /proc/uptime. Shell is the basename of SHELL, not a claim about the parent
+process. Terminal uses TERM_PROGRAM, falling back to TERM.
+.SH LIMITS
+Linux x86_64 and aarch64. Missing, inaccessible or unsupported fields display
+unavailable; no network fallback is used. Output is one snapshot and can change
+while the system is running. This utility intentionally does not reproduce
+every fastfetch module.
+.SH EXIT STATUS
+0 for success, including unavailable fields; 1 for output failure; 2 for an
+invalid option; 101 for an internal failure.
+.SH SEE ALSO
+.BR proc (5),
+.BR os-release (5)

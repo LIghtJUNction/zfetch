@@ -1,0 +1,27 @@
+[package]
+name = "zfetch"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.100"
+description = "A small, private-by-default native Linux system summary"
+license = "MIT"
+repository = "https://github.com/LIghtJUNction/zfetch"
+readme = "README.md"
+keywords = ["fetch", "linux", "no-std", "system"]
+categories = ["command-line-utilities", "no-std"]
+[workspace]
+resolver = "3"
+[dependencies]
+[[bin]]
+name = "zfetch"
+path = "src/main.rs"
+test = false
+bench = false
+[profile.dev]
+panic = "abort"
+[profile.release]
+panic = "abort"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+strip = true
