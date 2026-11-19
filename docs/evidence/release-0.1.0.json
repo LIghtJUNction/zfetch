@@ -32,5 +32,23 @@
       "static executable lacks PIE"
     ],
     "runtime_dependencies": []
+  },
+  "aur_publication": {
+    "verified_version": "0.1.0-1",
+    "verified_maintainer": "lightjunction",
+    "verification": [
+      "AUR RPC per-package readback",
+      "public HTTPS Git master readback"
+    ],
+    "packages": {
+      "zfetch-project-z": {
+        "url": "https://aur.archlinux.org/packages/zfetch-project-z",
+        "commit": "209edbbe26c95bf3f4aff9a14b2c5f39fa01ee20"
+      },
+      "zfetch-project-z-bin": {
+        "url": "https://aur.archlinux.org/packages/zfetch-project-z-bin",
+        "commit": "c38a3d11dd999b5b1dcc6eb847dc3d475c31b07b"
+      }
+    }
   }
 }
