@@ -23,7 +23,7 @@ python3 scripts/publish_crate.py
 python3 scripts/publish_crate.py --publish
 ```
 
-The first command is a dry run. The second repeats the packed-install checks and uploads the crate. The script requires a clean checkout, the exact local and remote tag, and a final official release containing both native archives. Cargo uses the existing local login; credentials are not copied into the repository or workflow.
+The first command is a dry run. It may read registry metadata; offline operation is reserved for the local package and installation checks. The second repeats the packed-install checks and uploads the crate. The script requires a clean checkout, the exact local and remote tag, and a final official release containing both native archives. Cargo uses the existing local login; credentials are not copied into the repository or workflow.
 
 After upload, check the exact version and checksum through the official registry API and perform a fresh `cargo install zfetch --version <version> --locked` into a temporary installation root. Run the existing CLI/PTY checks against that installed executable. A manifest version or successful source build alone is not publication evidence.
 

@@ -59,6 +59,8 @@ make install PREFIX="$HOME/.local"
 
 ## Performance with its scope
 
+The official v0.1.1 x86_64 executable is **28,648 bytes**; the aarch64 executable is **66,168 bytes**. Archive hashes, native release jobs, registry installation and AUR checks are recorded in [release evidence](docs/evidence/release-0.1.1.json). Locally compiled executables can differ with the build environment.
+
 The following measurements are from v0.1.0; they are not new measurements of the terminal layout added later. In 100 interleaved warm runs on one x86_64 developer machine, plain output took **0.429 ms median** and JSON took **0.385 ms median**, including Python process creation and waiting. fastfetch 2.71.0's same core module group took **2.503 ms median** in JSON. Their fields are not identical: fastfetch offers more probes and a wider feature set.
 
 The JSON memory sample was **60 KiB RSS** while blocked on its output pipe, compared with **4,996 KiB RSS** for the fastfetch core-module command. These are resident samples at a known point, not peak memory guarantees. The separate stock-default fastfetch result, commands, p95 values and raw records are in [Performance](docs/performance.md).

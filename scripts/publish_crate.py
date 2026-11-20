@@ -38,7 +38,7 @@ def main():
         parser.error("the official release must contain both native archives and checksums")
     subprocess.run([sys.executable, str(ROOT / "scripts/check_package.py")],
                    cwd=ROOT, check=True)
-    subprocess.run(["cargo", "publish", "--dry-run", "--locked", "--offline"],
+    subprocess.run(["cargo", "publish", "--dry-run", "--locked"],
                    cwd=ROOT, check=True)
     if args.publish:
         subprocess.run(["cargo", "publish", "--locked"], cwd=ROOT, check=True)

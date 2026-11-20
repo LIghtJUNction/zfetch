@@ -1,0 +1,161 @@
+{
+  "version": "0.1.1",
+  "tag": "v0.1.1",
+  "source_sha": "154c9b826a794e22135eda2d77a03b7214f8e427",
+  "tag_object": "b2ca7a424bc67891a46d782e17c18feae17cda4e",
+  "release_url": "https://github.com/LIghtJUNction/zfetch/releases/tag/v0.1.1",
+  "release_id": 452384510,
+  "published_at": "2026-11-20T07:24:34Z",
+  "native_workflow_url": "https://github.com/LIghtJUNction/zfetch/actions/runs/44694631822",
+  "native_workflow_result": [
+    {
+      "id": 136148323722,
+      "name": "build (ubuntu-24.04, x86_64)",
+      "conclusion": "success"
+    },
+    {
+      "id": 136148323979,
+      "name": "build (ubuntu-24.04-arm, aarch64)",
+      "conclusion": "success"
+    },
+    {
+      "id": 136148599246,
+      "name": "publish",
+      "conclusion": "success"
+    }
+  ],
+  "assets": [
+    {
+      "name": "SHA256SUMS",
+      "bytes": 199,
+      "digest": "sha256:5c287c3d9505d03d3a5035ce152dd8d8d19a762eea9ec35c40850eb469246895",
+      "url": "https://github.com/LIghtJUNction/zfetch/releases/download/v0.1.1/SHA256SUMS",
+      "verified_sha256": "5c287c3d9505d03d3a5035ce152dd8d8d19a762eea9ec35c40850eb469246895"
+    },
+    {
+      "name": "zfetch-0.1.1-linux-aarch64.tar.gz",
+      "bytes": 20300,
+      "digest": "sha256:f4bad574343080d0bcf33a22cea89ffd55845dd25b89a9dc24e009b46f1d3b25",
+      "url": "https://github.com/LIghtJUNction/zfetch/releases/download/v0.1.1/zfetch-0.1.1-linux-aarch64.tar.gz",
+      "verified_sha256": "f4bad574343080d0bcf33a22cea89ffd55845dd25b89a9dc24e009b46f1d3b25"
+    },
+    {
+      "name": "zfetch-0.1.1-linux-x86_64.tar.gz",
+      "bytes": 19864,
+      "digest": "sha256:c6309ca85ee14dbfc18d5ec81124f66f57b73b4d5936a0bec56fdefb277aa405",
+      "url": "https://github.com/LIghtJUNction/zfetch/releases/download/v0.1.1/zfetch-0.1.1-linux-x86_64.tar.gz",
+      "verified_sha256": "c6309ca85ee14dbfc18d5ec81124f66f57b73b4d5936a0bec56fdefb277aa405"
+    }
+  ],
+  "official_artifacts": {
+    "x86_64": {
+      "archive_sha256": "c6309ca85ee14dbfc18d5ec81124f66f57b73b4d5936a0bec56fdefb277aa405",
+      "archive_bytes": 19864,
+      "binary_sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+      "binary_bytes": 28648,
+      "downloaded_cli_pty_tests": 14
+    },
+    "aarch64": {
+      "archive_sha256": "f4bad574343080d0bcf33a22cea89ffd55845dd25b89a9dc24e009b46f1d3b25",
+      "archive_bytes": 20300,
+      "binary_sha256": "bdaeb072dbd5ed72fe978872cdad3ae2b62e2594d07d1daccc5847466b7524e7",
+      "binary_bytes": 66168,
+      "downloaded_smoke": "qemu-aarch64 --json passed"
+    }
+  },
+  "source_archive": {
+    "url": "https://github.com/LIghtJUNction/zfetch/archive/refs/tags/v0.1.1.tar.gz",
+    "sha256": "055267b68fcded41599981cf98d2a24789440d0dc0ad367b6d2dc198bb06057a",
+    "bytes": 33569,
+    "file": "zfetch-0.1.1-source.tar.gz"
+  },
+  "verified_at_utc": "2026-11-20T07:26:44.765025+00:00",
+  "cargo_registry": {
+    "schema": "zfetch.registry-install.v1",
+    "url": "https://crates.io/api/v1/crates/zfetch/0.1.1",
+    "version": "0.1.1",
+    "yanked": false,
+    "created_at": "2026-11-20T07:31:45.985575Z",
+    "repository": "https://github.com/LIghtJUNction/zfetch",
+    "crate_sha256": "80c5c50101f8e3f08c7ed15005c26b005839863f2a45670ccb92e245534e8d2c",
+    "crate_bytes": 13337,
+    "source_sha": "154c9b826a794e22135eda2d77a03b7214f8e427",
+    "installed_from": "zfetch 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+    "installed_binary": {
+      "bytes": 29120,
+      "sha256": "3f264c53051386695f540a5213bd7d56db171933ba77ae1beb274e6c8a0b341f"
+    },
+    "validation": {
+      "cli_pty_tests": 14,
+      "static_elf": "passed",
+      "runtime_path": "",
+      "outside_checkout": true,
+      "result": "passed"
+    },
+    "verified_at_utc": "2026-11-20T07:37:44.343882+00:00"
+  },
+  "aur_publication": {
+    "zfetch-project-z": {
+      "version": "0.1.1-1",
+      "package": "zfetch-project-z-0.1.1-1-x86_64.pkg.tar.zst",
+      "package_sha256": "3d92fc8aa1af11712c394ffea5ee9f61f4a8d9314710038455136c244a270fd5",
+      "binary_sha256": "646da161cd69e9e3f458a5c237a94e37cc74c21d5028b3c384889a7131d11b8f",
+      "binary_bytes": 29112,
+      "cli_pty_tests": 14,
+      "makepkg": "passed",
+      "pacman_dependency_check": "rustup 1.100.0 verified directly; --nodeps",
+      "commit": "2e2edaf3d8fda3c5c973661f506883938bc3b4ea",
+      "public_git_readback": "passed",
+      "rpc_url": "https://aur.archlinux.org/rpc/v5/info?arg%5B%5D=zfetch-project-z",
+      "rpc": [
+        {
+          "Name": "zfetch-project-z",
+          "Version": "0.1.1-1",
+          "Maintainer": "lightjunction",
+          "LastModified": 1795160184
+        }
+      ],
+      "url": "https://aur.archlinux.org/packages/zfetch-project-z",
+      "namcap": {
+        "exit": 0,
+        "stdout": "zfetch-project-z W: ELF file ('usr/bin/zfetch') lacks FULL RELRO, check LDFLAGS.\nzfetch-project-z W: ELF file ('usr/bin/zfetch') lacks PIE.\n",
+        "stderr": ""
+      }
+    },
+    "zfetch-project-z-bin": {
+      "version": "0.1.1-1",
+      "package": "zfetch-project-z-bin-0.1.1-1-x86_64.pkg.tar.zst",
+      "package_sha256": "862f07b7bcf22488628c36bfe1b1a7510f813fe4d28ff203dea12879a426d2d7",
+      "binary_sha256": "5ddbf53b7ab7332b722883483825c27a3c316bb42c4624566e019b3fc3d0ef39",
+      "binary_bytes": 28648,
+      "cli_pty_tests": 14,
+      "makepkg": "passed",
+      "pacman_dependency_check": "passed",
+      "commit": "bf872ba13ba871625e14b34a0458b77a1335fe75",
+      "public_git_readback": "passed",
+      "rpc_url": "https://aur.archlinux.org/rpc/v5/info?arg%5B%5D=zfetch-project-z-bin",
+      "rpc": [
+        {
+          "Name": "zfetch-project-z-bin",
+          "Version": "0.1.1-1",
+          "Maintainer": "lightjunction",
+          "LastModified": 1795160197
+        }
+      ],
+      "url": "https://aur.archlinux.org/packages/zfetch-project-z-bin",
+      "namcap": {
+        "exit": 0,
+        "stdout": "zfetch-project-z-bin W: ELF file ('usr/bin/zfetch') lacks FULL RELRO, check LDFLAGS.\nzfetch-project-z-bin W: ELF file ('usr/bin/zfetch') lacks PIE.\n",
+        "stderr": ""
+      }
+    }
+  },
+  "consumer_handoff": {
+    "repository": "LIghtJUNction/oh-my-ztty",
+    "source_tag": "v0.1.1",
+    "installation_owner": "oh-my-ztty maintainer",
+    "method": "existing versioned bundle installer and atomic current switch",
+    "status": "verified release receipt delivered; managed-suite installation follows its release"
+  },
+  "recorded_at_utc": "2026-11-20T07:41:10.934596+00:00"
+}
