@@ -2,7 +2,7 @@
 
 A small native Linux system summary with a restrained terminal view and stable JSON for scripts.
 
-The official v0.1.0 x86_64 executable is **22,808 bytes** (about 22.3 KiB). It uses Rust `no_std`, fixed buffers and direct Linux system calls: no Cargo dependencies, allocator, libc, external commands, network requests or background service. Default output omits user names, host names, IP addresses and serial numbers.
+The executable uses Rust `no_std`, fixed buffers and direct Linux system calls: no Cargo dependencies, allocator, libc, external commands, network requests or background service. Default output omits user names, host names, IP addresses and serial numbers.
 
 [Releases](https://github.com/LIghtJUNction/zfetch/releases) · [Measurements](docs/performance.md) · [Design](docs/design.md) · [oh-my-ztty](https://github.com/LIghtJUNction/oh-my-ztty)
 
@@ -22,6 +22,12 @@ For scripts, `--json`, `--format json`, and `--format=json` emit the same `zfetc
 `--format=text` explicitly selects text. Redirected default text keeps its compact, uncolored layout for existing consumers. If format options are repeated, the last one wins. Invalid options and failed writes report errors on stderr and return a nonzero status.
 
 ## Install
+
+With Rust 1.100 or newer on Linux x86_64 or aarch64, Cargo builds and installs the same native command:
+
+```sh
+cargo install zfetch --version 0.1.0 --locked
+```
 
 On Arch Linux, install [zfetch-project-z-bin](https://aur.archlinux.org/packages/zfetch-project-z-bin) for the official binary, or [zfetch-project-z](https://aur.archlinux.org/packages/zfetch-project-z) to build from source:
 
@@ -53,7 +59,7 @@ make install PREFIX="$HOME/.local"
 
 ## Performance with its scope
 
-In 100 interleaved warm runs on one x86_64 developer machine, plain output took **0.429 ms median** and JSON took **0.385 ms median**, including Python process creation and waiting. fastfetch 2.71.0's same core module group took **2.503 ms median** in JSON. Their fields are not identical: fastfetch offers more probes and a wider feature set.
+The following measurements are from v0.1.0; they are not new measurements of the terminal layout added later. In 100 interleaved warm runs on one x86_64 developer machine, plain output took **0.429 ms median** and JSON took **0.385 ms median**, including Python process creation and waiting. fastfetch 2.71.0's same core module group took **2.503 ms median** in JSON. Their fields are not identical: fastfetch offers more probes and a wider feature set.
 
 The JSON memory sample was **60 KiB RSS** while blocked on its output pipe, compared with **4,996 KiB RSS** for the fastfetch core-module command. These are resident samples at a known point, not peak memory guarantees. The separate stock-default fastfetch result, commands, p95 values and raw records are in [Performance](docs/performance.md).
 

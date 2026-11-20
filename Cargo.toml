@@ -9,6 +9,7 @@ repository = "https://github.com/LIghtJUNction/zfetch"
 readme = "README.md"
 keywords = ["fetch", "linux", "no-std", "system"]
 categories = ["command-line-utilities", "no-std"]
+include = ["Cargo.toml", "Cargo.lock", "build.rs", "src/**", "README.md", "LICENSE", "packaging/zfetch.1", "completions/_zfetch"]
 [workspace]
 resolver = "3"
 [dependencies]

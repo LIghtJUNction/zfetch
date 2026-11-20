@@ -30,11 +30,17 @@ if subprocess.run(["git", "rev-parse", "--verify", "refs/tags/" + tag], cwd=ROOT
 text, count = re.subn(r'(?m)^version = "' + re.escape(old) + r'"$', 'version = "' + version + '"', text, count=1)
 assert count == 1
 path.write_text(text)
+readme = ROOT / "README.md"
+readme_text = readme.read_text()
+readme_text = readme_text.replace("zfetch-" + old + "-linux-", "zfetch-" + version + "-linux-")
+readme_text = readme_text.replace("cargo install zfetch --version " + old + " --locked", "cargo install zfetch --version " + version + " --locked")
+readme.write_text(readme_text)
 run("cargo", "generate-lockfile", "--offline")
 print(old + " -> " + version)
 if args.release:
     run("make", "check")
-    run("git", "add", "Cargo.toml", "Cargo.lock")
+    run("python3", "scripts/check_package.py", "--allow-dirty")
+    run("git", "add", "Cargo.toml", "Cargo.lock", "README.md")
     run("git", "commit", "-m", "chore(release): " + tag)
     run("git", "tag", "-a", tag, "-m", "zfetch " + tag)
     run("git", "push", "--atomic", "origin", "HEAD:main", "refs/tags/" + tag)

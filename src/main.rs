@@ -38,6 +38,15 @@ fn panic(_: &core::panic::PanicInfo<'_>) -> ! {
     sys::write(2, b"zfetch: internal error\n");
     sys::exit(101)
 }
+// Hosted Linux libcore can retain this reference in unoptimized builds.
+// zfetch never unwinds: terminate if it is unexpectedly reached. This also
+// lets Cargo verify the packed crate with its default development profile.
+#[unsafe(no_mangle)]
+extern "C" fn rust_eh_personality() -> ! {
+    sys::write(2, b"zfetch: unexpected unwind\n");
+    sys::exit(101)
+}
+
 fn fail(text: &str) -> ! {
     sys::write(2, text.as_bytes());
     sys::exit(2)
