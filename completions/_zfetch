@@ -1,6 +1,7 @@
 #compdef zfetch
 _arguments \
-  '--json[emit zfetch.system.v1 JSON]' \
+  '--boot[show boot-to-desktop stages, configuration and service units]' \
+  '--json[emit system or boot-chain JSON]' \
   '--format=[select the output format]:format:(text json)' \
   '--no-color[disable ANSI color]' \
   '(-h --help)'{-h,--help}'[show help]' \

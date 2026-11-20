@@ -1,6 +1,6 @@
 PREFIX ?= $(HOME)/.local
 DESTDIR ?=
-TARGET_DIR = $(if $(CARGO_TARGET_DIR),$(CARGO_TARGET_DIR),target)
+TARGET_DIR = $(shell cargo metadata --no-deps --format-version=1 --offline | python3 -c 'import json,sys; print(json.load(sys.stdin)["target_directory"])')
 BINARY = $(TARGET_DIR)/release/zfetch
 .PHONY: build check test benchmark install uninstall clean
 build:

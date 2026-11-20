@@ -70,3 +70,29 @@ The JSON memory sample was **60 KiB RSS** while blocked on its output pipe, comp
 Linux x86_64 and aarch64 are supported. Shell means the `SHELL` environment variable's basename; terminal means `TERM_PROGRAM`, falling back to `TERM`. CPU model information is bounded to the first 4 KiB of `/proc/cpuinfo`. Memory used is `MemTotal - MemAvailable`. The summary intentionally does not enumerate packages, disks, GPUs, displays, sensors or desktop themes.
 
 This is part of Project Z. It can be bundled as a pinned Git submodule and used without starting an agent or opening a connection. MIT.
+
+## Boot-to-desktop report
+
+Current source builds can inspect the local boot structure on demand:
+
+~~~sh
+zfetch --boot
+zfetch --boot --json
+~~~
+
+The report covers firmware, boot loader, kernel, initramfs, systemd, its default
+target, login manager, user session and desktop. Each stage lists its evidence,
+related service or target names, and configuration paths. Runtime evidence is
+marked `observed`; installed configuration is marked `configured`. Inaccessible
+paths have `null` presence in JSON. The schema is `zfetch.boot.v1`.
+
+EFI loader identity and the current logind session take precedence over installed
+boot-loader and display-manager configuration. Desktop names provided only by
+the environment remain configuration evidence. Hyprland Lua configuration and
+SDDM drop-in files are included when present. The report reads bounded local
+files, starts no process, and displays home-relative paths with `$HOME`.
+
+The stages describe the boot structure; systemd starts services in parallel.
+Unit activation state and elapsed timings are outside this report. See the
+[systemd boot overview](https://www.freedesktop.org/software/systemd/man/latest/bootup.html)
+for the ordering and roles of the named targets.

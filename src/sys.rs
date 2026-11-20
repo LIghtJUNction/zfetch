@@ -9,6 +9,9 @@ mod nr {
     pub const UNAME: usize = 63;
     pub const OPENAT: usize = 257;
     pub const EXIT: usize = 60;
+    pub const READLINKAT: usize = 267;
+    pub const GETDENTS64: usize = 217;
+    pub const GETUID: usize = 102;
 }
 #[cfg(target_arch = "aarch64")]
 mod nr {
@@ -19,6 +22,9 @@ mod nr {
     pub const UNAME: usize = 160;
     pub const OPENAT: usize = 56;
     pub const EXIT: usize = 93;
+    pub const READLINKAT: usize = 78;
+    pub const GETDENTS64: usize = 61;
+    pub const GETUID: usize = 174;
 }
 
 #[inline]
@@ -66,7 +72,7 @@ pub fn write(fd: i32, mut bytes: &[u8]) -> bool {
     }
     true
 }
-pub fn read<'a>(path: &CStr, buffer: &'a mut [u8]) -> Option<&'a str> {
+pub fn read_bytes<'a>(path: &CStr, buffer: &'a mut [u8]) -> Option<&'a [u8]> {
     let fd = unsafe {
         syscall(
             nr::OPENAT,
@@ -109,14 +115,125 @@ pub fn read<'a>(path: &CStr, buffer: &'a mut [u8]) -> Option<&'a str> {
     if !success {
         return None;
     }
+    Some(&buffer[..len])
+}
+pub fn read<'a>(path: &CStr, buffer: &'a mut [u8]) -> Option<&'a str> {
+    let bytes = read_bytes(path, buffer)?;
     // Kernel text can be truncated in the middle of UTF-8 at the fixed limit.
-    match core::str::from_utf8(&buffer[..len]) {
+    match core::str::from_utf8(bytes) {
         Ok(text) => Some(text),
         Err(error) if error.error_len().is_none() => {
-            core::str::from_utf8(&buffer[..error.valid_up_to()]).ok()
+            core::str::from_utf8(&bytes[..error.valid_up_to()]).ok()
         }
         Err(_) => None,
     }
+}
+
+pub fn exists(path: &CStr) -> Option<bool> {
+    let fd = unsafe {
+        syscall(
+            nr::OPENAT,
+            -100isize as usize,
+            path.as_ptr() as usize,
+            0x200000 | 0x80000,
+            0,
+        )
+    }; // O_PATH | O_CLOEXEC
+    if fd >= 0 {
+        unsafe {
+            syscall(nr::CLOSE, fd as usize, 0, 0, 0);
+        }
+        Some(true)
+    } else if matches!(fd, -2 | -20) {
+        Some(false)
+    } else {
+        None
+    }
+}
+
+pub fn readlink<'a>(path: &CStr, buffer: &'a mut [u8]) -> Option<&'a str> {
+    let n = loop {
+        let n = unsafe {
+            syscall(
+                nr::READLINKAT,
+                -100isize as usize,
+                path.as_ptr() as usize,
+                buffer.as_mut_ptr() as usize,
+                buffer.len(),
+            )
+        };
+        if n != -4 {
+            break n;
+        }
+    };
+    if n < 0 || n as usize == buffer.len() {
+        return None;
+    }
+    core::str::from_utf8(&buffer[..n as usize]).ok()
+}
+
+pub fn uid() -> u32 {
+    unsafe { syscall(nr::GETUID, 0, 0, 0, 0) as u32 }
+}
+
+/// Collect a bounded set of basenames; filenames and directories are never executed.
+pub fn entries(path: &CStr, names: &mut [zfetch::Text<128>]) -> usize {
+    let fd = unsafe {
+        syscall(
+            nr::OPENAT,
+            -100isize as usize,
+            path.as_ptr() as usize,
+            0x10000 | 0x80000,
+            0,
+        )
+    }; // O_DIRECTORY | O_CLOEXEC
+    if fd < 0 {
+        return 0;
+    }
+    let mut buffer = [0u8; 4096];
+    let mut count = 0;
+    'read: for _ in 0..16 {
+        let n = unsafe {
+            syscall(
+                nr::GETDENTS64,
+                fd as usize,
+                buffer.as_mut_ptr() as usize,
+                buffer.len(),
+                0,
+            )
+        };
+        if n == -4 {
+            continue;
+        }
+        if n <= 0 {
+            break;
+        }
+        let mut offset = 0;
+        let end = n as usize;
+        while offset + 20 <= end {
+            let length = u16::from_le_bytes([buffer[offset + 16], buffer[offset + 17]]) as usize;
+            if length < 20 || offset + length > end {
+                break 'read;
+            }
+            let bytes = &buffer[offset + 19..offset + length];
+            let terminator = bytes.iter().position(|&v| v == 0).unwrap_or(bytes.len());
+            if let Ok(name) = core::str::from_utf8(&bytes[..terminator])
+                && !matches!(name, "." | "..")
+                && name.len() <= 128
+            {
+                if count == names.len() {
+                    break 'read;
+                }
+                names[count].set_clean(name);
+                count += 1;
+            }
+            offset += length;
+        }
+    }
+    unsafe {
+        syscall(nr::CLOSE, fd as usize, 0, 0, 0);
+    }
+    count
 }
 pub fn uname(buffer: &mut [u8; 390]) -> bool {
     unsafe { syscall(nr::UNAME, buffer.as_mut_ptr() as usize, 0, 0, 0) == 0 }

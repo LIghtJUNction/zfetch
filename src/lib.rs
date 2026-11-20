@@ -2,6 +2,7 @@
 #![no_std]
 #![forbid(unsafe_code)]
 use core::fmt;
+pub mod boot;
 
 /// UTF-8 text held in a fixed buffer.
 pub struct Text<const N: usize> {

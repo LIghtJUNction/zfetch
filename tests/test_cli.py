@@ -205,5 +205,25 @@ class Fetch(unittest.TestCase):
         self.assertNotIn("\x1b", text)
         self.assertIn("Threads:", text)
 
+    def test_boot_mode_has_a_separate_schema_and_bounded_evidence(self):
+        data = json.loads(self.run_cli("--boot", "--json").stdout)
+        self.assertEqual(data["schema"], "zfetch.boot.v1")
+        self.assertEqual(data["ordering"], "structural")
+        self.assertEqual([stage["stage"] for stage in data["stages"]], [
+            "firmware", "bootloader", "kernel", "initramfs", "system_manager",
+            "system_target", "login", "user_session", "desktop"])
+        for stage in data["stages"]:
+            self.assertIn(stage["status"], {"observed", "configured", "unavailable"})
+            self.assertIsInstance(stage["truncated"], bool)
+            for entry in stage["files"]:
+                self.assertIn(entry["present"], (True, False, None))
+                self.assertNotIn(str(Path.home()) + "/", entry["path"])
+
+    def test_boot_mode_respects_the_last_output_format(self):
+        self.assertEqual(json.loads(self.run_cli("--boot", "--format=text", "--json").stdout)["schema"], "zfetch.boot.v1")
+        output = self.run_cli("--json", "--boot", "--format=text").stdout
+        self.assertIn("zfetch boot", output)
+        self.assertNotIn(chr(27), output)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -3,7 +3,7 @@
 zfetch \- a small native Linux system summary
 .SH SYNOPSIS
 .B zfetch
-[--json | --format text|json] [--no-color]
+[--boot] [--json | --format text|json] [--no-color]
 .SH DESCRIPTION
 zfetch reads a bounded set of native system files and prints OS, kernel,
 architecture, CPU, online logical CPU count, memory use, uptime, configured
@@ -12,8 +12,20 @@ No package enumeration, network requests, external commands or resident process
 are used. User names, host names, IP addresses and serial numbers are omitted.
 .SH OPTIONS
 .TP
+.B --boot
+Show the boot-to-desktop structure: firmware, boot loader, kernel, initial RAM
+filesystem, system manager, default target, login manager, user session and desktop.
+Each stage includes available evidence, configuration paths and related systemd units.
+Observed runtime evidence is distinguished from configured paths. Unit activation
+states and timings are not queried; services may start in parallel.
+The option is read-only and starts no child process.
+.TP
 .B --json
-Emit one zfetch.system.v1 JSON object followed by a newline. All eleven keys
+Emit one zfetch.system.v1 JSON object followed by a newline. With --boot, emit
+a zfetch.boot.v1 object containing nine stages, status, evidence, units and files.
+File presence is true, false or null when unreadable. The boot report uses a bounded
+file listing and marks stages truncated when additional paths are omitted.
+For the normal system summary, All eleven keys
 are present. Missing fields are null; bytes and seconds are integers. This
 format never includes ANSI styling, terminal wrapping or a heading.
 .TP
@@ -42,6 +54,18 @@ OS comes from os-release, kernel and architecture from uname, CPU from the first
 Memory use is MemTotal minus MemAvailable from /proc/meminfo. Uptime is read
 from /proc/uptime. Shell is the basename of SHELL, not a claim about the parent
 process. Terminal uses TERM_PROGRAM, falling back to TERM.
+.SH BOOT SOURCES
+UEFI and its LoaderInfo variable identify available firmware and boot-loader data.
+Boot-loader configuration files alone are reported as configured. PID 1 comes from
+/proc/1/comm. The default target honors an explicit systemd.unit= kernel argument,
+then reads systemd default.target links in administrator, runtime and vendor locations.
+Current logind SERVICE identifies the login source first; display-manager.service
+provides the configured fallback. Unrelated installed login managers do not override
+the current session. Session details come from /run/systemd/sessions/$XDG_SESSION_ID.
+Desktop metadata uses that session, then XDG_CURRENT_DESKTOP. Environment-only
+desktop names and UWSM unit templates are marked configured. Hyprland Lua and
+classic configuration paths are inspected. HOME paths use a literal $HOME prefix.
+Complete kernel arguments, configuration contents and user names are omitted.
 .SH LIMITS
 Linux x86_64 and aarch64. Missing, inaccessible or unsupported fields display
 unavailable; no network fallback is used. Output is one snapshot and can change

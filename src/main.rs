@@ -5,12 +5,13 @@
     any(target_arch = "x86_64", target_arch = "aarch64")
 )))]
 compile_error!("zfetch supports Linux x86_64 and aarch64");
+mod boot_probe;
 mod display;
 mod sys;
 use core::{ffi::CStr, fmt::Write};
 use zfetch::{Text, json_string};
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-const HELP: &str = "zfetch — a small native Linux system summary\n\nUsage: zfetch [--json | --format text|json] [--no-color]\n  --json       Emit zfetch.system.v1 JSON; unavailable fields are null\n  --format     Select text or json output (also --format=json)\n  --no-color   Disable ANSI colors (also disabled when output is redirected)\n  -h, --help   Show this help without probing the system\n  -V, --version Show the version\n\nNo network, child processes, dynamic libraries or background service.\nDefault output omits user names, host names, IP addresses and serial numbers.\nNO_COLOR and TERM=dumb are respected. Text adapts to terminal width.\nShell is the configured SHELL; terminal uses TERM_PROGRAM\nor TERM. Memory used is MemTotal minus MemAvailable. Linux x86_64 and aarch64.\n";
+const HELP: &str = "zfetch — a small native Linux system summary\n\nUsage: zfetch [--boot] [--json | --format text|json] [--no-color]\n  --boot       Show boot-to-desktop evidence, configuration paths and service units\n  --json       Emit zfetch.system.v1 JSON, or zfetch.boot.v1 with --boot\n  --format     Select text or json output (also --format=json)\n  --no-color   Disable ANSI colors (also disabled when output is redirected)\n  -h, --help   Show this help without probing the system\n  -V, --version Show the version\n\nNo network, child processes, dynamic libraries or background service.\nDefault output omits user names, host names, IP addresses and serial numbers.\nNO_COLOR and TERM=dumb are respected. Text adapts to terminal width.\nShell is the configured SHELL; terminal uses TERM_PROGRAM\nor TERM. Memory used is MemTotal minus MemAvailable. Linux x86_64 and aarch64.\n";
 
 #[cfg(target_arch = "x86_64")]
 core::arch::global_asm!(
@@ -74,6 +75,7 @@ unsafe extern "C" fn zfetch_start(stack: *const usize) -> ! {
     let argv = unsafe { stack.add(1) as *const *const u8 };
     let envp = unsafe { argv.add(argc + 1) };
     let mut json = false;
+    let mut boot = false;
     let mut no_color = unsafe { sys::env(envp, "NO_COLOR") }.is_some()
         || unsafe { sys::env(envp, "TERM") } == Some("dumb");
     if argc > 32 {
@@ -84,6 +86,7 @@ unsafe extern "C" fn zfetch_start(stack: *const usize) -> ! {
         let arg = unsafe { CStr::from_ptr((*argv.add(i)).cast()) }.to_bytes();
         match arg {
             b"--json" => json = true,
+            b"--boot" => boot = true,
             b"--format" => {
                 i += 1;
                 if i == argc {
@@ -104,6 +107,9 @@ unsafe extern "C" fn zfetch_start(stack: *const usize) -> ! {
             _ => fail("zfetch: unknown argument; run zfetch --help\n"),
         }
         i += 1;
+    }
+    if boot {
+        unsafe { boot_probe::emit(envp, json) }
     }
     let info = unsafe { collect(envp) };
     let mut out = Text::<8192>::new();
