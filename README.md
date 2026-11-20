@@ -26,7 +26,7 @@ For scripts, `--json`, `--format json`, and `--format=json` emit the same `zfetc
 With Rust 1.100 or newer on Linux x86_64 or aarch64, Cargo builds and installs the same native command:
 
 ```sh
-cargo install zfetch --version 0.1.0 --locked
+cargo install zfetch --version 0.1.1 --locked
 ```
 
 On Arch Linux, install [zfetch-project-z-bin](https://aur.archlinux.org/packages/zfetch-project-z-bin) for the official binary, or [zfetch-project-z](https://aur.archlinux.org/packages/zfetch-project-z) to build from source:
@@ -42,8 +42,8 @@ Download the archive for Linux x86_64 or aarch64 and `SHA256SUMS` from [Releases
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS
-tar -xzf zfetch-0.1.0-linux-x86_64.tar.gz
-install -Dm755 zfetch-0.1.0-linux-x86_64/bin/zfetch "$HOME/.local/bin/zfetch"
+tar -xzf zfetch-0.1.1-linux-x86_64.tar.gz
+install -Dm755 zfetch-0.1.1-linux-x86_64/bin/zfetch "$HOME/.local/bin/zfetch"
 ```
 
 The archive also includes a manual, zsh completion and license. To build from source with Rust 1.100 or newer:
