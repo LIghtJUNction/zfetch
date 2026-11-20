@@ -16,7 +16,7 @@ The tag workflow runs native x86_64 and ARM64 checks and produces both determini
 
 ## Publish to crates.io
 
-Wait for both native release jobs and the publication job to succeed. Read the tag and release back from GitHub and verify the downloaded archive bytes against `SHA256SUMS`. From the unchanged release-tag checkout:
+These maintainer commands use an authenticated GitHub CLI (`gh`) to verify the release. Wait for both native release jobs and the publication job to succeed. Read the tag and release back from GitHub and verify the downloaded archive bytes against `SHA256SUMS`. From the unchanged release-tag checkout:
 
 ```sh
 python3 scripts/publish_crate.py
