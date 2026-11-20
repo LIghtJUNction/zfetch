@@ -5,6 +5,7 @@ import json
 import os
 import pty
 import subprocess
+import signal
 import time
 import unittest
 
@@ -31,6 +32,7 @@ class Fetch(unittest.TestCase):
         self.assertEqual(set(data), KEYS)
         self.assertEqual(data["schema"], "zfetch.system.v1")
         self.assertNotIn("\x1b", result.stdout)
+        self.assertEqual(result.stderr, "")
         self.assertIsInstance(data["memory_total_bytes"], int)
         self.assertGreater(data["memory_total_bytes"], 0)
         self.assertGreaterEqual(data["memory_used_bytes"], 0)
@@ -103,6 +105,66 @@ class Fetch(unittest.TestCase):
         env.pop("NO_COLOR", None)
         self.assertIn("\x1b[38;2;212;163;115m", self.terminal_output(env))
         env["NO_COLOR"] = ""
+        self.assertNotIn("\x1b", self.terminal_output(env))
+
+    def test_format_selection_is_explicit_and_compatible(self):
+        for args in [("--format", "json"), ("--format=json",), ("--format=text", "--json")]:
+            result = self.run_cli(*args)
+            self.assertEqual(set(json.loads(result.stdout)), KEYS)
+            self.assertEqual(result.stderr, "")
+        for args in [("--format", "text"), ("--format=text",), ("--json", "--format=text")]:
+            result = self.run_cli(*args)
+            self.assertIn("zfetch", result.stdout)
+            self.assertFalse(result.stdout.lstrip().startswith("{"))
+            self.assertNotIn("\x1b", result.stdout)
+        for args in [("--format",), ("--format=xml",), ("--format", "--json"), ("--format=",)]:
+            result = self.run_cli(*args, expected=2)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("--format", result.stderr)
+
+    def test_json_roundtrips_quotes_backslashes_and_utf8(self):
+        terminal = 'terminal "quoted" \\ path 你好'
+        env = dict(os.environ, TERM_PROGRAM=terminal, SHELL="/bin/a\\b")
+        result = self.run_cli("--format=json", env=env)
+        def unique_object(pairs):
+            self.assertEqual(len(pairs), len(dict(pairs)), "duplicate JSON field")
+            return dict(pairs)
+        data = json.loads(result.stdout, object_pairs_hook=unique_object)
+        self.assertEqual(data["terminal"], terminal)
+        self.assertEqual(data["shell"], "a\\b")
+        self.assertEqual(set(data), KEYS)
+        self.assertEqual(result.stderr, "")
+        for key in ("os", "kernel", "architecture", "cpu", "shell", "terminal"):
+            self.assertTrue(data[key] is None or isinstance(data[key], str))
+        for key in ("logical_cpus", "memory_total_bytes", "memory_used_bytes", "uptime_seconds"):
+            self.assertTrue(data[key] is None or type(data[key]) is int)
+
+    def test_output_failures_use_stderr_and_nonzero_status(self):
+        for args in [(), ("--json",), ("--help",), ("--version",)]:
+            with open("/dev/full", "wb", buffering=0) as sink:
+                result = subprocess.run([str(BINARY), *args], stdout=sink, stderr=subprocess.PIPE, timeout=5)
+            self.assertEqual(result.returncode, 1, args)
+            self.assertIn(b"unable to write output", result.stderr)
+
+    def test_closed_pipe_terminates_without_hanging(self):
+        for restore_signals in [True, False]:
+            read_fd, write_fd = os.pipe()
+            os.close(read_fd)
+            try:
+                result = subprocess.run([str(BINARY), "--json"], stdout=write_fd,
+                                        stderr=subprocess.PIPE, restore_signals=restore_signals, timeout=5)
+            finally:
+                os.close(write_fd)
+            if restore_signals:
+                self.assertEqual(result.returncode, -signal.SIGPIPE)
+                self.assertEqual(result.stderr, b"")
+            else:
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(b"unable to write output", result.stderr)
+
+    def test_dumb_terminal_never_receives_ansi(self):
+        env = dict(os.environ, TERM="dumb")
+        env.pop("NO_COLOR", None)
         self.assertNotIn("\x1b", self.terminal_output(env))
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ mod sys;
 use core::{ffi::CStr, fmt::Write};
 use zfetch::{Text, json_string};
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-const HELP: &str = "zfetch — a small native Linux system summary\n\nUsage: zfetch [--json] [--no-color]\n  --json       Emit zfetch.system.v1 JSON; unavailable fields are null\n  --no-color   Disable ANSI colors (also disabled when output is redirected)\n  -h, --help   Show this help without probing the system\n  -V, --version Show the version\n\nNo network, child processes, dynamic libraries or background service.\nDefault output omits user names, host names, IP addresses and serial numbers.\nNO_COLOR is respected. Shell is the configured SHELL; terminal uses TERM_PROGRAM\nor TERM. Memory used is MemTotal minus MemAvailable. Linux x86_64 and aarch64.\n";
+const HELP: &str = "zfetch — a small native Linux system summary\n\nUsage: zfetch [--json | --format text|json] [--no-color]\n  --json       Emit zfetch.system.v1 JSON; unavailable fields are null\n  --format     Select text or json output (also --format=json)\n  --no-color   Disable ANSI colors (also disabled when output is redirected)\n  -h, --help   Show this help without probing the system\n  -V, --version Show the version\n\nNo network, child processes, dynamic libraries or background service.\nDefault output omits user names, host names, IP addresses and serial numbers.\nNO_COLOR is respected. Shell is the configured SHELL; terminal uses TERM_PROGRAM\nor TERM. Memory used is MemTotal minus MemAvailable. Linux x86_64 and aarch64.\n";
 
 #[cfg(target_arch = "x86_64")]
 core::arch::global_asm!(
@@ -42,34 +42,58 @@ fn fail(text: &str) -> ! {
     sys::exit(2)
 }
 
+/// Keep stdout exclusively for the requested output, including help and version.
+fn emit(bytes: &[u8]) -> ! {
+    if sys::write(1, bytes) {
+        sys::exit(0);
+    }
+    sys::write(2, b"zfetch: unable to write output\n");
+    sys::exit(1)
+}
+fn json_format(value: &[u8]) -> bool {
+    match value {
+        b"json" => true,
+        b"text" => false,
+        _ => fail("zfetch: --format expects text or json\n"),
+    }
+}
+
 #[unsafe(no_mangle)]
 unsafe extern "C" fn zfetch_start(stack: *const usize) -> ! {
     let argc = unsafe { *stack };
     let argv = unsafe { stack.add(1) as *const *const u8 };
     let envp = unsafe { argv.add(argc + 1) };
     let mut json = false;
-    let mut no_color = unsafe { sys::env(envp, "NO_COLOR") }.is_some();
+    let mut no_color = unsafe { sys::env(envp, "NO_COLOR") }.is_some()
+        || unsafe { sys::env(envp, "TERM") } == Some("dumb");
     if argc > 32 {
         fail("zfetch: too many arguments\n");
     }
-    for i in 1..argc {
+    let mut i = 1;
+    while i < argc {
         let arg = unsafe { CStr::from_ptr((*argv.add(i)).cast()) }.to_bytes();
         match arg {
             b"--json" => json = true,
+            b"--format" => {
+                i += 1;
+                if i == argc {
+                    fail("zfetch: --format requires text or json\n");
+                }
+                json = json_format(unsafe { CStr::from_ptr((*argv.add(i)).cast()) }.to_bytes());
+            }
+            value if value.starts_with(b"--format=") => {
+                json = json_format(&value[b"--format=".len()..]);
+            }
             b"--no-color" => no_color = true,
             b"--help" | b"-h" => {
-                sys::write(1, HELP.as_bytes());
-                sys::exit(0);
+                emit(HELP.as_bytes());
             }
             b"--version" | b"-V" => {
-                sys::write(
-                    1,
-                    concat!("zfetch ", env!("CARGO_PKG_VERSION"), "\n").as_bytes(),
-                );
-                sys::exit(0);
+                emit(concat!("zfetch ", env!("CARGO_PKG_VERSION"), "\n").as_bytes());
             }
             _ => fail("zfetch: unknown argument; run zfetch --help\n"),
         }
+        i += 1;
     }
     let info = unsafe { collect(envp) };
     let mut out = Text::<8192>::new();
@@ -81,11 +105,7 @@ unsafe extern "C" fn zfetch_start(stack: *const usize) -> ! {
     if status.is_err() {
         fail("zfetch: bounded output exceeded\n");
     }
-    sys::exit(if sys::write(1, out.as_str().as_bytes()) {
-        0
-    } else {
-        1
-    })
+    emit(out.as_str().as_bytes())
 }
 
 #[derive(Default)]
