@@ -5,11 +5,12 @@
     any(target_arch = "x86_64", target_arch = "aarch64")
 )))]
 compile_error!("zfetch supports Linux x86_64 and aarch64");
+mod display;
 mod sys;
 use core::{ffi::CStr, fmt::Write};
 use zfetch::{Text, json_string};
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-const HELP: &str = "zfetch — a small native Linux system summary\n\nUsage: zfetch [--json | --format text|json] [--no-color]\n  --json       Emit zfetch.system.v1 JSON; unavailable fields are null\n  --format     Select text or json output (also --format=json)\n  --no-color   Disable ANSI colors (also disabled when output is redirected)\n  -h, --help   Show this help without probing the system\n  -V, --version Show the version\n\nNo network, child processes, dynamic libraries or background service.\nDefault output omits user names, host names, IP addresses and serial numbers.\nNO_COLOR is respected. Shell is the configured SHELL; terminal uses TERM_PROGRAM\nor TERM. Memory used is MemTotal minus MemAvailable. Linux x86_64 and aarch64.\n";
+const HELP: &str = "zfetch — a small native Linux system summary\n\nUsage: zfetch [--json | --format text|json] [--no-color]\n  --json       Emit zfetch.system.v1 JSON; unavailable fields are null\n  --format     Select text or json output (also --format=json)\n  --no-color   Disable ANSI colors (also disabled when output is redirected)\n  -h, --help   Show this help without probing the system\n  -V, --version Show the version\n\nNo network, child processes, dynamic libraries or background service.\nDefault output omits user names, host names, IP addresses and serial numbers.\nNO_COLOR and TERM=dumb are respected. Text adapts to terminal width.\nShell is the configured SHELL; terminal uses TERM_PROGRAM\nor TERM. Memory used is MemTotal minus MemAvailable. Linux x86_64 and aarch64.\n";
 
 #[cfg(target_arch = "x86_64")]
 core::arch::global_asm!(
@@ -99,8 +100,10 @@ unsafe extern "C" fn zfetch_start(stack: *const usize) -> ! {
     let mut out = Text::<8192>::new();
     let status = if json {
         info.json(&mut out)
+    } else if sys::tty() {
+        display::terminal(&info, &mut out, !no_color, sys::columns().unwrap_or(80))
     } else {
-        info.display(&mut out, !no_color && sys::tty())
+        info.plain(&mut out)
     };
     if status.is_err() {
         fail("zfetch: bounded output exceeded\n");
@@ -207,32 +210,18 @@ impl Info {
         json_text(out, "terminal", &self.terminal)?;
         out.write_str("}\n")
     }
-    fn display(&self, out: &mut Text<8192>, color: bool) -> core::fmt::Result {
-        let accent = if color { "\x1b[38;2;212;163;115m" } else { "" };
-        let muted = if color { "\x1b[38;2;163;151;139m" } else { "" };
-        let ink = if color { "\x1b[38;2;232;222;210m" } else { "" };
-        let reset = if color { "\x1b[0m" } else { "" };
-        writeln!(out, "\n  {accent}zfetch{reset}  {muted}{VERSION}{reset}\n")?;
+    fn plain(&self, out: &mut Text<8192>) -> core::fmt::Result {
+        writeln!(out, "\n  zfetch  {VERSION}\n")?;
         for (label, text) in [("os", known(&self.os)), ("kernel", known(&self.kernel))] {
-            writeln!(out, "  {muted}{label:<10}{reset}{ink}{text}{reset}")?;
+            writeln!(out, "  {label:<10}{text}")?;
         }
-        writeln!(
-            out,
-            "  {muted}{:<10}{reset}{ink}{}{reset}",
-            "arch",
-            known(&self.architecture)
-        )?;
-        write!(
-            out,
-            "  {muted}{:<10}{reset}{ink}{}",
-            "cpu",
-            known(&self.cpu)
-        )?;
+        writeln!(out, "  {:<10}{}", "arch", known(&self.architecture))?;
+        write!(out, "  {:<10}{}", "cpu", known(&self.cpu))?;
         if let Some(n) = self.logical_cpus {
-            write!(out, "  {muted}· {n} threads")?;
+            write!(out, "  · {n} threads")?;
         }
-        writeln!(out, "{reset}")?;
-        write!(out, "  {muted}{:<10}{reset}{ink}", "memory")?;
+        writeln!(out)?;
+        write!(out, "  {:<10}", "memory")?;
         if let (Some(used), Some(total)) = (self.memory_used, self.memory_total) {
             size(out, used)?;
             out.write_str(" / ")?;
@@ -240,37 +229,20 @@ impl Info {
         } else {
             out.write_str("unavailable")?;
         }
-        writeln!(out, "{reset}")?;
-        write!(out, "  {muted}{:<10}{reset}{ink}", "uptime")?;
-        if let Some(seconds) = self.uptime {
-            let days = seconds / 86400;
-            let hours = seconds / 3600 % 24;
-            let minutes = seconds / 60 % 60;
-            if days > 0 {
-                write!(out, "{days}d ")?;
-            }
-            if days > 0 || hours > 0 {
-                write!(out, "{hours}h ")?;
-            }
-            if seconds < 60 {
-                write!(out, "{seconds}s")?;
-            } else {
-                write!(out, "{minutes}m")?;
-            }
-        } else {
-            out.write_str("unavailable")?;
-        }
-        writeln!(out, "{reset}")?;
+        writeln!(out)?;
+        write!(out, "  {:<10}", "uptime")?;
+        duration(out, self.uptime)?;
+        writeln!(out)?;
         for (label, text) in [
             ("shell", known(&self.shell)),
             ("terminal", known(&self.terminal)),
         ] {
-            writeln!(out, "  {muted}{label:<10}{reset}{ink}{text}{reset}")?;
+            writeln!(out, "  {label:<10}{text}")?;
         }
         writeln!(out)
     }
 }
-fn size(out: &mut Text<8192>, bytes: u64) -> core::fmt::Result {
+fn size<const N: usize>(out: &mut Text<N>, bytes: u64) -> core::fmt::Result {
     let (unit, label) = if bytes >= 1u64 << 40 {
         (1u64 << 40, "TiB")
     } else if bytes >= 1u64 << 30 {
@@ -280,4 +252,24 @@ fn size(out: &mut Text<8192>, bytes: u64) -> core::fmt::Result {
     };
     let tenths = bytes / unit * 10 + (bytes % unit * 10 + unit / 2) / unit;
     write!(out, "{}.{} {label}", tenths / 10, tenths % 10)
+}
+
+fn duration<const N: usize>(out: &mut Text<N>, uptime: Option<u64>) -> core::fmt::Result {
+    let Some(seconds) = uptime else {
+        return out.write_str("unavailable");
+    };
+    let days = seconds / 86400;
+    let hours = seconds / 3600 % 24;
+    let minutes = seconds / 60 % 60;
+    if days > 0 {
+        write!(out, "{days}d ")?;
+    }
+    if days > 0 || hours > 0 {
+        write!(out, "{hours}h ")?;
+    }
+    if seconds < 60 {
+        write!(out, "{seconds}s")
+    } else {
+        write!(out, "{minutes}m")
+    }
 }

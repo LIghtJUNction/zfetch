@@ -1,6 +1,6 @@
 # zfetch
 
-A small native Linux system summary. Warm white, copper, quiet spacing.
+A small native Linux system summary with a restrained terminal view and stable JSON for scripts.
 
 The official v0.1.0 x86_64 executable is **22,808 bytes** (about 22.3 KiB). It uses Rust `no_std`, fixed buffers and direct Linux system calls: no Cargo dependencies, allocator, libc, external commands, network requests or background service. Default output omits user names, host names, IP addresses and serial numbers.
 
@@ -10,11 +10,16 @@ The official v0.1.0 x86_64 executable is **22,808 bytes** (about 22.3 KiB). It u
 
 ```sh
 zfetch
-zfetch --json
 zfetch --no-color
+zfetch --json | jq '.memory_used_bytes'
+zfetch --format=json
 ```
 
-The default view shows OS, kernel, architecture, CPU, online thread count, memory, uptime, configured shell and terminal identifier. Missing fields are `unavailable` in text and `null` in JSON. Redirecting output or setting `NO_COLOR` disables ANSI color. No patched font is required.
+The terminal view groups system, hardware and session fields with whitespace, one blue accent and the terminal's default text color. It wraps values to the actual window width and puts labels above values in narrow terminals. No patched font is required. `--no-color`, `NO_COLOR` (even when empty), `TERM=dumb`, and redirected stdout disable ANSI styling.
+
+For scripts, `--json`, `--format json`, and `--format=json` emit the same `zfetch.system.v1` object. All eleven fields remain present, unavailable values are `null`, and byte/second counters are integers. Quotes, backslashes and Unicode are escaped as JSON requires. There is no heading, color, progress text or success diagnostic. The [field contract and limits](docs/design.md#output-contracts) describe each key.
+
+`--format=text` explicitly selects text. Redirected default text keeps its compact, uncolored layout for existing consumers. If format options are repeated, the last one wins. Invalid options and failed writes report errors on stderr and return a nonzero status.
 
 ## Install
 

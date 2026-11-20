@@ -2,6 +2,11 @@
 """Validate output, privacy defaults, live counters and terminal behavior."""
 from pathlib import Path
 import json
+import fcntl
+import re
+import struct
+import termios
+import unicodedata
 import os
 import pty
 import subprocess
@@ -80,9 +85,10 @@ class Fetch(unittest.TestCase):
         self.assertIsNone(data["shell"])
         self.assertIsNone(data["terminal"])
 
-    def terminal_output(self, env):
+    def terminal_output(self, env, args=(), columns=80):
         master, slave = pty.openpty()
-        process = subprocess.Popen([str(BINARY)], stdout=slave, stderr=subprocess.PIPE, env=env)
+        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 24, columns, 0, 0))
+        process = subprocess.Popen([str(BINARY), *args], stdout=slave, stderr=subprocess.PIPE, env=env)
         os.close(slave)
         data = bytearray()
         try:
@@ -103,7 +109,7 @@ class Fetch(unittest.TestCase):
     def test_truecolor_only_on_tty_and_no_color_is_respected(self):
         env = dict(os.environ)
         env.pop("NO_COLOR", None)
-        self.assertIn("\x1b[38;2;212;163;115m", self.terminal_output(env))
+        self.assertIn("\x1b[1;38;2;66;133;244m", self.terminal_output(env))
         env["NO_COLOR"] = ""
         self.assertNotIn("\x1b", self.terminal_output(env))
 
@@ -166,6 +172,38 @@ class Fetch(unittest.TestCase):
         env = dict(os.environ, TERM="dumb")
         env.pop("NO_COLOR", None)
         self.assertNotIn("\x1b", self.terminal_output(env))
+
+    def test_terminal_layout_wraps_at_actual_pty_width(self):
+        env = dict(os.environ, TERM="xterm-256color", TERM_PROGRAM="你好" * 60, COLUMNS="200")
+        env.pop("NO_COLOR", None)
+        for columns in [1, 12, 24, 39, 40, 80]:
+            text = self.terminal_output(env, columns=columns)
+            visible = re.sub(r"\x1b\[[0-9;]*m", "", text)
+            for line in visible.splitlines():
+                cells = sum(0 if unicodedata.combining(ch) else
+                            2 if unicodedata.east_asian_width(ch) in "WF" else 1 for ch in line)
+                self.assertLessEqual(cells, columns, (columns, line))
+            if columns >= 12:
+                for label in ["OS", "Kernel", "Arch", "CPU", "Threads", "Memory", "Uptime", "Shell", "Terminal"]:
+                    self.assertRegex(visible, rf"(?m)^\s*{label}(?:\s|:)")
+        wide = self.terminal_output(env, columns=80)
+        self.assertRegex(wide, r"\d+%")
+        self.assertIn("online", wide)
+
+    def test_json_is_not_decorated_or_wrapped_even_on_a_narrow_tty(self):
+        env = dict(os.environ, TERM="xterm-256color", TERM_PROGRAM="test terminal")
+        env.pop("NO_COLOR", None)
+        text = self.terminal_output(env, args=("--json",), columns=12)
+        self.assertNotIn("\x1b", text)
+        self.assertEqual(set(json.loads(text)), KEYS)
+        self.assertEqual(len(text.splitlines()), 1)
+
+    def test_no_color_flag_preserves_terminal_layout_without_escapes(self):
+        env = dict(os.environ, TERM="xterm-256color")
+        env.pop("NO_COLOR", None)
+        text = self.terminal_output(env, args=("--no-color",), columns=24)
+        self.assertNotIn("\x1b", text)
+        self.assertIn("Threads:", text)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

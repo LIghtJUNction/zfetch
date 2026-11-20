@@ -1,0 +1,81 @@
+{
+  "recorded_at_utc": "2026-11-20T06:16:44Z",
+  "platform": {
+    "os": "Linux",
+    "architecture": "x86_64"
+  },
+  "source_base_commit": "ef786f656cce83a7ac37262025ea659a10868d2d",
+  "binary": {
+    "bytes": 29112
+  },
+  "validation": {
+    "build_environment": {
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_TARGET_DIR": "<temporary build directory>"
+    },
+    "make_check": {
+      "command": [
+        "make",
+        "check"
+      ],
+      "exit": 0,
+      "stdout": "cargo fmt --check\ncargo test --lib --locked --offline\n\nrunning 6 tests\ntest tests::cpu_ranges_match_online_contract ... ok\ntest tests::os_release_decodes_but_never_evaluates ... ok\ntest tests::decimal_is_bounded ... ok\ntest tests::memory_uses_available_and_checked_units ... ok\ntest tests::text_cannot_inject_terminal_controls ... ok\ntest tests::uptime_is_exact_integer_seconds ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\ncargo build --release --locked --offline\ncargo clippy --lib --bin zfetch --locked --offline -- -D warnings\npython3 scripts/check_binary.py \"<target>/release/zfetch\"\nStatic ELF verified: 29112 bytes; zero Cargo dependencies, libc or dynamic loader.\nZFETCH_BIN=\"<target>/release/zfetch\" python3 tests/test_cli.py\n",
+      "stderr": "   Compiling zfetch v0.1.0 (<worktree>)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.36s\n     Running unittests src/lib.rs (<target>/debug/build/zfetch/7000b0802d307bb9/out/zfetch-7000b0802d307bb9)\n   Compiling zfetch v0.1.0 (<worktree>)\n    Finished `release` profile [optimized] target(s) in 0.41s\n   Compiling zfetch v0.1.0 (<worktree>)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s\ntest_closed_pipe_terminates_without_hanging (__main__.Fetch.test_closed_pipe_terminates_without_hanging) ... ok\ntest_dumb_terminal_never_receives_ansi (__main__.Fetch.test_dumb_terminal_never_receives_ansi) ... ok\ntest_environment_is_bounded_and_cannot_inject_escapes (__main__.Fetch.test_environment_is_bounded_and_cannot_inject_escapes) ... ok\ntest_format_selection_is_explicit_and_compatible (__main__.Fetch.test_format_selection_is_explicit_and_compatible) ... ok\ntest_json_is_not_decorated_or_wrapped_even_on_a_narrow_tty (__main__.Fetch.test_json_is_not_decorated_or_wrapped_even_on_a_narrow_tty) ... ok\ntest_json_roundtrips_quotes_backslashes_and_utf8 (__main__.Fetch.test_json_roundtrips_quotes_backslashes_and_utf8) ... ok\ntest_json_schema_has_only_documented_nonidentity_fields (__main__.Fetch.test_json_schema_has_only_documented_nonidentity_fields) ... ok\ntest_kernel_counters_are_read_from_the_host (__main__.Fetch.test_kernel_counters_are_read_from_the_host) ... ok\ntest_no_color_flag_preserves_terminal_layout_without_escapes (__main__.Fetch.test_no_color_flag_preserves_terminal_layout_without_escapes) ... ok\ntest_output_failures_use_stderr_and_nonzero_status (__main__.Fetch.test_output_failures_use_stderr_and_nonzero_status) ... ok\ntest_pipe_output_is_plain_and_compact (__main__.Fetch.test_pipe_output_is_plain_and_compact) ... ok\ntest_terminal_layout_wraps_at_actual_pty_width (__main__.Fetch.test_terminal_layout_wraps_at_actual_pty_width) ... ok\ntest_truecolor_only_on_tty_and_no_color_is_respected (__main__.Fetch.test_truecolor_only_on_tty_and_no_color_is_respected) ... ok\ntest_version_and_help (__main__.Fetch.test_version_and_help) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 0.029s\n\nOK\n"
+    },
+    "extra_checks": [
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "zsh",
+          "-f",
+          "-n",
+          "completions/_zfetch"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "rust_parser_tests": 6,
+    "cli_pty_tests": 14,
+    "pty_columns": [
+      1,
+      12,
+      24,
+      39,
+      40,
+      80
+    ],
+    "new_arm64_runtime_validation": false
+  },
+  "terminal_previews": [
+    {
+      "columns": 80,
+      "ansi": "\n\u001b[1;38;2;66;133;244m  zfetch  0.1.0\n\u001b[0m\n  \u001b[2mOS        \u001b[0mOmarchy\n  \u001b[2mKernel    \u001b[0m7.3.4-arch1-1\n  \u001b[2mArch      \u001b[0mx86_64\n\n  \u001b[2mCPU       \u001b[0m12th Gen Intel(R) Core(TM) i9-12900HX\n  \u001b[2mThreads   \u001b[0m24 online\n  \u001b[2mMemory    \u001b[0m10.9 GiB / 15.3 GiB  70%\n\n  \u001b[2mUptime    \u001b[0m1d 1h 19m\n  \u001b[2mShell     \u001b[0mzsh\n  \u001b[2mTerminal  \u001b[0mztty\n\n",
+      "plain": "\n  zfetch  0.1.0\n\n  OS        Omarchy\n  Kernel    7.3.4-arch1-1\n  Arch      x86_64\n\n  CPU       12th Gen Intel(R) Core(TM) i9-12900HX\n  Threads   24 online\n  Memory    10.9 GiB / 15.3 GiB  70%\n\n  Uptime    1d 1h 19m\n  Shell     zsh\n  Terminal  ztty\n\n"
+    },
+    {
+      "columns": 24,
+      "ansi": "\n\u001b[1;38;2;66;133;244m  zfetch  0.1.0\n\u001b[0m\n\u001b[2m  OS:\n\u001b[0m    Omarchy\n\u001b[2m  Kernel:\n\u001b[0m    7.3.4-arch1-1\n\u001b[2m  Arch:\n\u001b[0m    x86_64\n\n\u001b[2m  CPU:\n\u001b[0m    12th Gen Intel(R)\n    Core(TM) i9-12900HX\n\u001b[2m  Threads:\n\u001b[0m    24 online\n\u001b[2m  Memory:\n\u001b[0m    10.9 GiB / 15.3 GiB\n    70%\n\n\u001b[2m  Uptime:\n\u001b[0m    1d 1h 19m\n\u001b[2m  Shell:\n\u001b[0m    zsh\n\u001b[2m  Terminal:\n\u001b[0m    ztty\n\n",
+      "plain": "\n  zfetch  0.1.0\n\n  OS:\n    Omarchy\n  Kernel:\n    7.3.4-arch1-1\n  Arch:\n    x86_64\n\n  CPU:\n    12th Gen Intel(R)\n    Core(TM) i9-12900HX\n  Threads:\n    24 online\n  Memory:\n    10.9 GiB / 15.3 GiB\n    70%\n\n  Uptime:\n    1d 1h 19m\n  Shell:\n    zsh\n  Terminal:\n    ztty\n\n"
+    }
+  ],
+  "review": {
+    "contribution": "Adaptive terminal rows and explicit script formats address observed width and write-failure gaps.",
+    "clarity": "README, manual and design reference agree on options, field types, nulls and exit behavior.",
+    "experimental_strength": "Checks invoke the compiled executable against Linux counters, PTYs and failed output descriptors.",
+    "evaluation_completeness": "Includes narrow/wide and CJK text, NO_COLOR, TERM=dumb, JSON escaping/nulls, format precedence, /dev/full and both SIGPIPE dispositions. New execution evidence is Linux x86_64 only.",
+    "method_soundness": "Fixed buffers and zero runtime dependencies remain; conservative Unicode wrapping can occur early and is documented."
+  },
+  "source_scope": "Rust sources and tests committed with this record"
+}

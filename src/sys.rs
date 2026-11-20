@@ -126,6 +126,13 @@ pub fn tty() -> bool {
     unsafe { syscall(nr::IOCTL, 1, 0x5401, termios.as_mut_ptr() as usize, 0) == 0 }
 }
 
+/// Read stdout's actual window size without relying on a stale COLUMNS value.
+pub fn columns() -> Option<u16> {
+    let mut size = [0u16; 4];
+    let result = unsafe { syscall(nr::IOCTL, 1, 0x5413, size.as_mut_ptr() as usize, 0) };
+    (result == 0 && size[1] != 0).then_some(size[1])
+}
+
 /// Startup environment access; values are borrowed and never executed.
 pub unsafe fn env<'a>(mut envp: *const *const u8, name: &str) -> Option<&'a str> {
     loop {

@@ -1,2 +1,7 @@
 #compdef zfetch
-_arguments '--json[emit structured system information]' '--no-color[disable ANSI color]' '(-h --help)'{-h,--help}'[show help]' '(-V --version)'{-V,--version}'[show version]'
+_arguments \
+  '--json[emit zfetch.system.v1 JSON]' \
+  '--format=[select the output format]:format:(text json)' \
+  '--no-color[disable ANSI color]' \
+  '(-h --help)'{-h,--help}'[show help]' \
+  '(-V --version)'{-V,--version}'[show version]'
